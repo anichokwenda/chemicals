@@ -24,14 +24,14 @@ app.use(express.json());
 
 app.use('/api/chemicals', require('./routes/chemicals'));
 
-// SWAGGER - MUST BE BEFORE 404
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// FIX - split into 2 lines
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
 app.get('/', (req, res) => {
   res.json({ message: 'API running', docs: '/api-docs' });
 });
 
-// 404 - MUST BE LAST
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
