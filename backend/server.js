@@ -2,61 +2,44 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+
+let swaggerDocument = {};
+try {
+  swaggerDocument = require('./swagger.json');
+  console.log('✅ swagger.json loaded');
+} catch(e) {
+  console.log('⚠️ swagger.json not found, using empty');
+  swaggerDocument = {
+    swagger: "2.0",
+    info: { title: "Temp API", version: "1.0.0" },
+    paths: {}
+  };
+}
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use('/api/chemicals', require('./routes/chemicals'));
 
-// Optional: only load suppliers if file exists
-try {
-  app.use('/api/suppliers', require('./routes/suppliers'));
-} catch (e) {
-  console.log('Note: suppliers route not found yet - skipping');
-}
+// SWAGGER - MUST BE BEFORE 404
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Swagger - only load if installed
-try {
-  const swaggerUi = require('swagger-ui-express');
-  const swaggerDocument = require('./swagger.json');
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-  console.log('Swagger docs loaded at /api-docs');
-} catch (e) {
-  console.log('Swagger not configured yet - run swagger.js to generate swagger.json');
-}
-
-// Base route
 app.get('/', (req, res) => {
-  res.status(200).json({ 
-    message: 'Compliance Copilot API is running - Week 03',
-    endpoints: {
-      chemicals: '/api/chemicals',
-      suppliers: '/api/suppliers',
-      docs: '/api-docs'
-    }
-  });
+  res.json({ message: 'API running', docs: '/api-docs' });
 });
 
-// 404 handler
+// 404 - MUST BE LAST
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
 const PORT = process.env.PORT || 3000;
-
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('✅ MongoDB Connected to chemicalsDB');
-    app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
-      console.log(`🔗 Local: http://localhost:${PORT}`);
-      console.log(`🔗 Chemicals: http://localhost:${PORT}/api/chemicals`);
-    });
+    console.log('✅ MongoDB Connected');
+    app.listen(PORT, () => console.log(`Server on http://localhost:${PORT} docs at /api-docs`));
   })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-  });
+  .catch(err => console.error(err));

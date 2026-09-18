@@ -1,0 +1,75 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Compliance Copilot - Chemicals API - Week 03",
+    "version": "1.0.0",
+    "description": "CRUD for chemicals"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": ["http", "https"],
+  "definitions": {
+    "Chemical": {
+      "type": "object",
+      "required": ["name", "formula", "casNumber", "hazardLevel"],
+      "properties": {
+        "name": { "type": "string", "example": "Sulfuric Acid" },
+        "formula": { "type": "string", "example": "H2SO4" },
+        "casNumber": { "type": "string", "example": "7664-93-9" },
+        "hazardLevel": { "type": "string", "enum": ["low", "medium", "high", "extreme"], "example": "high" },
+        "quantity": { "type": "number", "example": 500 },
+        "unit": { "type": "string", "example": "L" },
+        "supplier": { "type": "string", "example": "ChemSupply Ltd" },
+        "storageLocation": { "type": "string", "example": "Lab A - Shelf 2" }
+      }
+    }
+  },
+  "paths": {
+    "/api/chemicals": {
+      "get": {
+        "tags": ["Chemicals"],
+        "summary": "Get all chemicals",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["Chemicals"],
+        "summary": "Create chemical",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Chemical" }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/chemicals/{id}": {
+      "get": {
+        "tags": ["Chemicals"],
+        "summary": "Get chemical by ID",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "put": {
+        "tags": ["Chemicals"],
+        "summary": "Update chemical",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }
+        ],
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "tags": ["Chemicals"],
+        "summary": "Delete chemical",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }],
+        "responses": { "200": { "description": "Deleted" } }
+      }
+    }
+  }
+}

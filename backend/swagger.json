@@ -1,0 +1,44 @@
+﻿{
+  "swagger": "2.0",
+  "info": { "title": "Chemicals API - Week 03", "version": "1.0.0" },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": ["http"],
+  "definitions": {
+    "Chemical": {
+      "type": "object",
+      "required": ["name", "concentration", "batch_no", "supplier"],
+      "properties": {
+        "name": { "type": "string", "example": "Sulfuric Acid" },
+        "concentration": { "type": "string", "example": "98%" },
+        "batch_no": { "type": "string", "example": "SA-2026-001" },
+        "supplier": { "type": "string", "example": "ChemSupply Ltd" },
+        "mfg_date": { "type": "string", "format": "date-time", "example": "2026-01-15T00:00:00.000Z" },
+        "expiry_date": { "type": "string", "format": "date-time", "example": "2027-01-15T00:00:00.000Z" },
+        "quantity": { "type": "number", "example": 500 },
+        "unit": { "type": "string", "example": "mL" },
+        "location": { "type": "string", "example": "Shelf A1" },
+        "hazard_class": { "type": "string", "example": "Corrosive" },
+        "ppe": { "type": "array", "items": { "type": "string" }, "example": ["Gloves", "Goggles"] },
+        "status": { "type": "string", "example": "In Stock" },
+        "incompatible_with": { "type": "array", "items": { "type": "string" }, "example": [] }
+      }
+    }
+  },
+  "paths": {
+    "/api/chemicals": {
+      "get": { "tags": ["Chemicals"], "summary": "Get all chemicals", "responses": { "200": { "description": "OK" } } },
+      "post": {
+        "tags": ["Chemicals"],
+        "summary": "Create chemical",
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }],
+        "responses": { "201": { "description": "Created" }, "400": { "description": "Validation error" } }
+      }
+    },
+    "/api/chemicals/{id}": {
+      "get": { "tags": ["Chemicals"], "summary": "Get by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" } } },
+      "put": { "tags": ["Chemicals"], "summary": "Update", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "200": { "description": "Updated" } } },
+      "delete": { "tags": ["Chemicals"], "summary": "Delete", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
+    }
+  }
+}
