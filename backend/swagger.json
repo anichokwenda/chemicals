@@ -1,9 +1,8 @@
 ﻿{
   "swagger": "2.0",
   "info": { "title": "Chemicals API - Week 03", "version": "1.0.0" },
-  "host": "https://chemicals-kw61.onrender.com",
   "basePath": "/",
-  "schemes": ["http"],
+  "schemes": ["https", "http"],
   "definitions": {
     "Chemical": {
       "type": "object",
@@ -13,8 +12,8 @@
         "concentration": { "type": "string", "example": "98%" },
         "batch_no": { "type": "string", "example": "SA-2026-001" },
         "supplier": { "type": "string", "example": "ChemSupply Ltd" },
-        "mfg_date": { "type": "string", "format": "date-time", "example": "2026-01-15T00:00:00.000Z" },
-        "expiry_date": { "type": "string", "format": "date-time", "example": "2027-01-15T00:00:00.000Z" },
+        "mfg_date": { "type": "string", "format": "date", "example": "2026-01-15" },
+        "expiry_date": { "type": "string", "format": "date", "example": "2027-01-15" },
         "quantity": { "type": "number", "example": 500 },
         "unit": { "type": "string", "example": "mL" },
         "location": { "type": "string", "example": "Shelf A1" },
@@ -36,7 +35,7 @@
       }
     },
     "/api/chemicals/{id}": {
-      "get": { "tags": ["Chemicals"], "summary": "Get by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" } } },
+      "get": { "tags": ["Chemicals"], "summary": "Get by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } },
       "put": { "tags": ["Chemicals"], "summary": "Update", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "200": { "description": "Updated" } } },
       "delete": { "tags": ["Chemicals"], "summary": "Delete", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
     }
