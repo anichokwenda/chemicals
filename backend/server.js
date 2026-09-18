@@ -3,13 +3,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
+const fs = require('fs');
 
 let swaggerDocument = {};
 try {
-  swaggerDocument = require('./swagger.json');
+  const raw = fs.readFileSync('./swagger.json', 'utf8').replace(/^\uFEFF/, '').trim();
+  swaggerDocument = JSON.parse(raw);
   console.log('✅ swagger.json loaded');
 } catch(e) {
-  console.log('⚠️ swagger.json not found, using empty');
+  console.log('⚠️ swagger.json error:', e.message);
   swaggerDocument = {
     swagger: "2.0",
     info: { title: "Temp API", version: "1.0.0" },
@@ -18,28 +20,18 @@ try {
 }
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
-
 app.use('/api/chemicals', require('./routes/chemicals'));
-
-// FIX - split into 2 lines
 app.use('/api-docs', swaggerUi.serve);
 app.get('/api-docs', swaggerUi.setup(swaggerDocument));
-
-app.get('/', (req, res) => {
-  res.json({ message: 'API running', docs: '/api-docs' });
-});
-
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+app.get('/', (req, res) => res.json({ message: 'API running', docs: '/api-docs' }));
+app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB Connected');
-    app.listen(PORT, () => console.log(`Server on http://localhost:${PORT} docs at /api-docs`));
+    app.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
   })
   .catch(err => console.error(err));
