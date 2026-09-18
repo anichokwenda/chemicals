@@ -1,7 +1,7 @@
 ﻿{
   "swagger": "2.0",
   "info": { "title": "Chemicals API - Week 03", "version": "1.0.0" },
-  "host": "localhost:3000",
+  "host": "https://chemicals-kw61.onrender.com",
   "basePath": "/",
   "schemes": ["http"],
   "definitions": {
