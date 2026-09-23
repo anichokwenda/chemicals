@@ -1,12 +1,21 @@
-﻿{
+{
   "swagger": "2.0",
-  "info": { "title": "Chemicals API - Week 03", "version": "1.0.0" },
+  "info": {
+    "title": "Chemicals API - Week 03 - 2 Collections",
+    "version": "1.0.0",
+    "description": "API with Chemicals and Suppliers collections"
+  },
+  "host": "localhost:3000",
   "basePath": "/",
-  "schemes": ["https", "http"],
+  "schemes": ["http"],
+  "tags": [
+    { "name": "Chemicals", "description": "Chemicals collection" },
+    { "name": "Suppliers", "description": "Suppliers collection - 2nd collection" }
+  ],
   "definitions": {
     "Chemical": {
       "type": "object",
-      "required": ["name", "concentration", "batch_no", "supplier"],
+      "required": ["name", "concentration", "batch_no", "supplier", "mfg_date", "expiry_date", "quantity", "unit"],
       "properties": {
         "name": { "type": "string", "example": "Sulfuric Acid" },
         "concentration": { "type": "string", "example": "98%" },
@@ -19,25 +28,41 @@
         "location": { "type": "string", "example": "Shelf A1" },
         "hazard_class": { "type": "string", "example": "Corrosive" },
         "ppe": { "type": "array", "items": { "type": "string" }, "example": ["Gloves", "Goggles"] },
-        "status": { "type": "string", "example": "In Stock" },
-        "incompatible_with": { "type": "array", "items": { "type": "string" }, "example": [] }
+        "status": { "type": "string", "enum": ["In Stock", "Low", "Empty", "Expired"], "example": "In Stock" },
+        "incompatible_with": { "type": "array", "items": { "type": "string" }, "example": ["Water", "Metals"] },
+        "sds_url": { "type": "string" }
+      }
+    },
+    "Supplier": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "example": "ChemSupply Ltd" },
+        "contact_person": { "type": "string", "example": "John Doe" },
+        "email": { "type": "string", "example": "sales@chemsupply.com" },
+        "phone": { "type": "string", "example": "+1-555-0100" },
+        "address": { "type": "string", "example": "123 Lab Street" }
       }
     }
   },
   "paths": {
     "/api/chemicals": {
       "get": { "tags": ["Chemicals"], "summary": "Get all chemicals", "responses": { "200": { "description": "OK" } } },
-      "post": {
-        "tags": ["Chemicals"],
-        "summary": "Create chemical",
-        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }],
-        "responses": { "201": { "description": "Created" }, "400": { "description": "Validation error" } }
-      }
+      "post": { "tags": ["Chemicals"], "summary": "Create chemical", "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "201": { "description": "Created" }, "400": { "description": "Validation error" } } }
     },
     "/api/chemicals/{id}": {
-      "get": { "tags": ["Chemicals"], "summary": "Get by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } },
-      "put": { "tags": ["Chemicals"], "summary": "Update", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "200": { "description": "Updated" } } },
-      "delete": { "tags": ["Chemicals"], "summary": "Delete", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
+      "get": { "tags": ["Chemicals"], "summary": "Get by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" } } },
+      "put": { "tags": ["Chemicals"], "summary": "Update chemical", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "200": { "description": "Updated" } } },
+      "delete": { "tags": ["Chemicals"], "summary": "Delete chemical", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
+    },
+    "/api/suppliers": {
+      "get": { "tags": ["Suppliers"], "summary": "Get all suppliers - 2nd Collection", "responses": { "200": { "description": "OK" } } },
+      "post": { "tags": ["Suppliers"], "summary": "Create supplier", "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Supplier" } }], "responses": { "201": { "description": "Created" } } }
+    },
+    "/api/suppliers/{id}": {
+      "get": { "tags": ["Suppliers"], "summary": "Get supplier by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" } } },
+      "put": { "tags": ["Suppliers"], "summary": "Update supplier", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Supplier" } }], "responses": { "200": { "description": "Updated" } } },
+      "delete": { "tags": ["Suppliers"], "summary": "Delete supplier", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
     }
   }
 }

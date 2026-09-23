@@ -1,64 +1,59 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const Chemical = require('../models/chemical');
-const { validateChemical } = require('../middleware/validate');
 const router = express.Router();
+const Chemical = require('../models/chemical');
 
-// --- RUBRIC REQUIRED CRUD ---
 // GET all
 router.get('/', async (req, res) => {
   try {
-    const chemicals = await Chemical.find();
-    res.status(200).json(chemicals);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const chemicals = await Chemical.find().sort({ createdAt: -1 });
+    res.json(chemicals);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// GET single
+// GET one
 router.get('/:id', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid ID format" });
-    const chem = await Chemical.findById(req.params.id);
-    if (!chem) return res.status(404).json({ msg: "Chemical Not Found" });
-    res.status(200).json(chem);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    const chemical = await Chemical.findById(req.params.id);
+    if (!chemical) return res.status(404).json({ error: 'Chemical not found' });
+    res.json(chemical);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// POST create
-router.post('/', validateChemical, async (req, res) => {
+// POST
+router.post('/', async (req, res) => {
   try {
-    const chem = await Chemical.create(req.body);
-    res.status(201).json(chem);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+    const chemical = new Chemical(req.body);
+    const saved = await chemical.save();
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// PUT update
-router.put('/:id', validateChemical, async (req, res) => {
+// PUT
+router.put('/:id', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid ID format" });
     const updated = await Chemical.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!updated) return res.status(404).json({ msg: "Chemical Not Found" });
-    res.status(200).json(updated);
-  } catch (e) { res.status(400).json({ error: e.message }); }
+    if (!updated) return res.status(404).json({ error: 'Chemical not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 // DELETE
 router.delete('/:id', async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ error: "Invalid ID format" });
     const deleted = await Chemical.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ msg: "Chemical Not Found" });
-    res.status(200).json({ msg: "Deleted", id: req.params.id });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// --- YOUR CUSTOM ROUTES (Keep them as extra) ---
-router.get('/dashboard/expiring', async (req, res) => {
-  try {
-    const sixtyDays = new Date();
-    sixtyDays.setDate(sixtyDays.getDate() + 60);
-    const expiring = await Chemical.find({ expiry_date: { $lte: sixtyDays, $gte: new Date() } });
-    res.status(200).json(expiring);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    if (!deleted) return res.status(404).json({ error: 'Chemical not found' });
+    res.json({ message: 'Chemical deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
