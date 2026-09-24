@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "description": "API with Chemicals and Suppliers collections"
   },
-  "host": "https://chemicals-kw61.onrender.com",
+  "host": "chemicals-kw61.onrender.com",
   "basePath": "/",
   "schemes": ["https"],
   "tags": [
