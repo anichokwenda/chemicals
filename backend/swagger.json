@@ -1,17 +1,29 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Chemicals API - Week 03 - 2 Collections",
+    "title": "Chemicals API - Week 04 - Auth - 2 Collections",
     "version": "1.0.0",
-    "description": "API with Chemicals and Suppliers collections"
+    "description": "API with Chemicals and Suppliers collections - Week 4 adds GitHub OAuth. GET is public, POST/PUT/DELETE requires login."
   },
   "host": "chemicals-kw61.onrender.com",
   "basePath": "/",
   "schemes": ["https"],
   "tags": [
     { "name": "Chemicals", "description": "Chemicals collection" },
-    { "name": "Suppliers", "description": "Suppliers collection - 2nd collection" }
+    { "name": "Suppliers", "description": "Suppliers collection - 2nd collection" },
+    { "name": "Authentication", "description": "OAuth Login/Logout" }
   ],
+  "securityDefinitions": {
+    "githubOAuth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://github.com/login/oauth/authorize",
+      "tokenUrl": "https://github.com/login/oauth/access_token",
+      "flow": "accessCode",
+      "scopes": {
+        "read:user": "Read user profile"
+      }
+    }
+  },
   "definitions": {
     "Chemical": {
       "type": "object",
@@ -46,23 +58,76 @@
     }
   },
   "paths": {
+    "/login": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Login with GitHub",
+        "description": "Redirects to GitHub for OAuth login",
+        "responses": { "302": { "description": "Redirect to GitHub" } }
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Logout",
+        "description": "Logs out the current user",
+        "responses": { "200": { "description": "Logged out" } }
+      }
+    },
     "/api/chemicals": {
       "get": { "tags": ["Chemicals"], "summary": "Get all chemicals", "responses": { "200": { "description": "OK" } } },
-      "post": { "tags": ["Chemicals"], "summary": "Create chemical", "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "201": { "description": "Created" }, "400": { "description": "Validation error" } } }
+      "post": {
+        "tags": ["Chemicals"],
+        "summary": "Create chemical - PROTECTED",
+        "description": "Requires login. Will return 401 if not authenticated.",
+        "security": [{ "githubOAuth": ["read:user"] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }],
+        "responses": { "201": { "description": "Created" }, "401": { "description": "Unauthorized - Please login" }, "400": { "description": "Validation error" } }
+      }
     },
     "/api/chemicals/{id}": {
       "get": { "tags": ["Chemicals"], "summary": "Get by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" } } },
-      "put": { "tags": ["Chemicals"], "summary": "Update chemical", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }], "responses": { "200": { "description": "Updated" } } },
-      "delete": { "tags": ["Chemicals"], "summary": "Delete chemical", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
+      "put": {
+        "tags": ["Chemicals"],
+        "summary": "Update chemical - PROTECTED",
+        "security": [{ "githubOAuth": ["read:user"] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Chemical" } }],
+        "responses": { "200": { "description": "Updated" }, "401": { "description": "Unauthorized - Please login" } }
+      },
+      "delete": {
+        "tags": ["Chemicals"],
+        "summary": "Delete chemical - PROTECTED",
+        "security": [{ "githubOAuth": ["read:user"] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }],
+        "responses": { "200": { "description": "Deleted" }, "401": { "description": "Unauthorized - Please login" } }
+      }
     },
     "/api/suppliers": {
       "get": { "tags": ["Suppliers"], "summary": "Get all suppliers - 2nd Collection", "responses": { "200": { "description": "OK" } } },
-      "post": { "tags": ["Suppliers"], "summary": "Create supplier", "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Supplier" } }], "responses": { "201": { "description": "Created" } } }
+      "post": {
+        "tags": ["Suppliers"],
+        "summary": "Create supplier - PROTECTED",
+        "security": [{ "githubOAuth": ["read:user"] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Supplier" } }],
+        "responses": { "201": { "description": "Created" }, "401": { "description": "Unauthorized" } }
+      }
     },
     "/api/suppliers/{id}": {
       "get": { "tags": ["Suppliers"], "summary": "Get supplier by ID", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "OK" } } },
-      "put": { "tags": ["Suppliers"], "summary": "Update supplier", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Supplier" } }], "responses": { "200": { "description": "Updated" } } },
-      "delete": { "tags": ["Suppliers"], "summary": "Delete supplier", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }], "responses": { "200": { "description": "Deleted" } } }
+      "put": {
+        "tags": ["Suppliers"],
+        "summary": "Update supplier - PROTECTED",
+        "security": [{ "githubOAuth": ["read:user"] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }, { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/Supplier" } }],
+        "responses": { "200": { "description": "Updated" }, "401": { "description": "Unauthorized" } }
+      },
+      "delete": {
+        "tags": ["Suppliers"],
+        "summary": "Delete supplier - PROTECTED",
+        "security": [{ "githubOAuth": ["read:user"] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "string" }],
+        "responses": { "200": { "description": "Deleted" }, "401": { "description": "Unauthorized" } }
+      }
     }
   }
 }

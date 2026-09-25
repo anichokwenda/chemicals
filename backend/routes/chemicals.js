@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Chemical = require('../models/chemical');
+const { isAuthenticated } = require('../middleware/authenticate');
 
-// GET all
+// GET all - PUBLIC
 router.get('/', async (req, res) => {
   try {
     const chemicals = await Chemical.find().sort({ createdAt: -1 });
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET one
+// GET one - PUBLIC
 router.get('/:id', async (req, res) => {
   try {
     const chemical = await Chemical.findById(req.params.id);
@@ -23,8 +24,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST
-router.post('/', async (req, res) => {
+// POST - PROTECTED
+router.post('/', isAuthenticated, async (req, res) => {
   try {
     const chemical = new Chemical(req.body);
     const saved = await chemical.save();
@@ -34,8 +35,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT
-router.put('/:id', async (req, res) => {
+// PUT - PROTECTED
+router.put('/:id', isAuthenticated, async (req, res) => {
   try {
     const updated = await Chemical.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!updated) return res.status(404).json({ error: 'Chemical not found' });
@@ -45,8 +46,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE
-router.delete('/:id', async (req, res) => {
+// DELETE - PROTECTED
+router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
     const deleted = await Chemical.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Chemical not found' });
