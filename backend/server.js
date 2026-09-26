@@ -6,11 +6,9 @@ const swaggerUi = require('swagger-ui-express');
 const fs = require('fs');
 const path = require('path');
 
-// --- ADDED FOR AUTH - START ---
 const session = require('express-session');
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2').Strategy;
-// --- ADDED FOR AUTH - END ---
 
 const Chemical = require('./models/chemical');
 
@@ -34,14 +32,19 @@ try {
 }
 
 const app = express();
-app.use(cors());
+
+// FIX 1: Allow cookies/credentials
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 
-// --- ADDED FOR AUTH - START ---
+// FIX 2: saveUninitialized false
 app.use(session({
   secret: process.env.SESSION_SECRET || 'secret',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -58,7 +61,6 @@ passport.use(new GitHubStrategy({
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
-// Auth routes - does not touch your other routes
 app.get('/login', passport.authenticate('github'));
 app.get('/auth/github/callback', 
   passport.authenticate('github', { failureRedirect: '/api-docs' }),
@@ -73,16 +75,11 @@ app.get('/logout', (req, res, next) => {
     req.session.destroy(() => res.redirect('/'));
   });
 });
-// --- ADDED FOR AUTH - END ---
 
-// TWO COLLECTIONS - SAME AS YOURS
 app.use('/api/chemicals', require('./routes/chemicals'));
 app.use('/api/suppliers', require('./routes/suppliers'));
-
-// FIXED - single line for docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// YOUR HOMEPAGE - NOT CHANGED (just added login/logout button)
 app.get('/', async (req, res) => {
   try {
     const chemicals = await Chemical.find().sort({ createdAt: -1 }).limit(50);
